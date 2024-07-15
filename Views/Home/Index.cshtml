@@ -1,0 +1,106 @@
+﻿@using Syncfusion.EJ2
+@{
+    ViewData["Title"] = "BatchEditing";
+}
+@{
+    var valAccessor = "valAccessorFn";
+}
+<h2>BatchEditing</h2>
+
+
+    <div class="control-section">
+        <ejs-grid id="Grid" dataSource="ViewBag.DataSource" toolbar="@(new List<string>() { "Add","Delete","Update","Cancel" })" allowPaging="true" actionFailure="actionFailure">
+            <e-grid-editSettings allowAdding="true" allowDeleting="true" allowEditing="true" mode="Batch"></e-grid-editSettings>
+            <e-grid-pagesettings pageCount="5"></e-grid-pagesettings>
+            <e-grid-columns>
+                <e-grid-column field="OrderID" headerText="Order ID" isPrimaryKey="true" validationRules="@(new { required=true, number=true})" textAlign="Right" width="120"></e-grid-column>
+                <e-grid-column field="CustomerID" valueAccessor="valAccessor" headerText="Customer Name" validationRules="@(new { required=true})" width="150" disableHtmlEncode="false"
+                               edit="@( new { create = "OnCreate", read = "OnRead", write = "OnWrite",
+                                    destroy = "OnDestroy" } )"></e-grid-column>
+                <e-grid-column field="Freight" headerText="Freight" validationRules="@(new { required=true})" textAlign="Right" editType="numericedit" format="C2" width="120"></e-grid-column>
+                <e-grid-column field="OrderDate" headerText="Order Date" editType="datepickeredit" format="yMd" width="170"></e-grid-column>
+                <e-grid-column field="ShipCountry" headerText="Ship Country" editType="dropdownedit" width="150"></e-grid-column>
+            </e-grid-columns>
+        </ejs-grid>
+    </div>
+
+
+    <script type="text/javascript">
+        function load(args) {
+            // bind the token to dataSource headers
+            this.dataSource.dataSource.headers = [{ 'Syncfusion': true }];
+        }
+
+        function actionFailure(args) {
+            args.error.error.text().then(text => {
+                console.log(text);
+            })
+        }
+
+        function onCreated()
+        {
+            this.keyConfigs.enter = '';
+        }
+
+
+        function valAccessorFn(field, data, column) {
+            var value = data[field];
+            if (value != undefined) {
+                return value.split('\n').join('<br>');
+            } else {
+                return '';
+            }
+        }
+
+
+        var elem;
+        var textedit;
+
+
+        function OnCreate() {
+            elem = document.createElement('textarea');
+            elem.id = "elemEventDescription";
+            return elem;
+        }
+        function OnRead(args) {
+            //        return args.value;
+            return textedit.inputPreviousValue;
+        }
+        function OnWrite(args) {
+            textedit = new ej.inputs.TextBox({
+                multiline: true,
+                value: args.rowData.CustomerID,
+                floatLabelType: 'Auto',
+                created: function () {
+                    this.addAttributes({ rows: "1" });
+                    this.element.style.height = "auto";
+                    this.element.style.height = (this.element.scrollHeight - 7) + "px";
+                    console.log('Created:'+this.element.scrollHeight);
+                },
+                input: function () {
+                    this.element.style.height = "auto";
+                    this.element.style.height = (this.element.scrollHeight) + "px";
+                    console.log('Input:'+this.element.scrollHeight);
+                }
+            });
+            textedit.appendTo(elem);
+        }
+        function OnDestroy() {
+            textedit.destroy();
+        }
+
+
+
+
+    </script>
+
+    <div id="action-description">
+        <p>This sample demonstrates CRUD operations in Grid. You can perform CRUD operations as follows,</p>
+        <ul>
+            <li><code>Add</code> -  To add new record, click Add toolbar button </li>
+            <li><code>Edit</code> - To edit record, double click a cell </li>
+            <li><code>Delete</code> - To delete record, click toolbar Delete button after selected a row </li>
+            <li><code>Update</code>,<code>Cancel</code> - You can save or discard changes by click toolbar Update and Cancel button respectively</li>
+        </ul>
+    </div>
+​
